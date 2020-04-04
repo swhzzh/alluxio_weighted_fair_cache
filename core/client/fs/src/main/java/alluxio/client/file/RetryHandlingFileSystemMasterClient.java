@@ -35,6 +35,7 @@ import alluxio.grpc.GetNewBlockIdForFilePRequest;
 import alluxio.grpc.GetStatusPOptions;
 import alluxio.grpc.GetStatusPRequest;
 import alluxio.grpc.GetSyncPathListPRequest;
+import alluxio.grpc.GetWeightsRequest;
 import alluxio.grpc.GrpcUtils;
 import alluxio.grpc.ListStatusPOptions;
 import alluxio.grpc.ListStatusPRequest;
@@ -51,6 +52,7 @@ import alluxio.grpc.SetAclPOptions;
 import alluxio.grpc.SetAclPRequest;
 import alluxio.grpc.SetAttributePOptions;
 import alluxio.grpc.SetAttributePRequest;
+import alluxio.grpc.SetUserWeightsRequest;
 import alluxio.grpc.StartSyncPRequest;
 import alluxio.grpc.StopSyncPRequest;
 import alluxio.grpc.UnmountPOptions;
@@ -319,6 +321,19 @@ public final class RetryHandlingFileSystemMasterClient extends AbstractMasterCli
         () -> mClient.updateUfsMode(UpdateUfsModePRequest.newBuilder()
             .setUfsPath(ufsUri.getRootPath()).setOptions(options).build()),
         "UpdateUfsMode");
+  }
+
+  @Override
+  public void setUserWeights(long userId, Map<Long, Double> weights) throws AlluxioStatusException {
+    retryRPC(() -> mClient.setUserWeights(SetUserWeightsRequest.newBuilder()
+            .setUserId(userId).putAllWeights(weights).build()),
+        "setUserWeights");
+  }
+
+  @Override
+  public Map<Long, Double> getWeights(long userId) throws AlluxioStatusException {
+    return retryRPC(() -> mClient.getWeights(GetWeightsRequest.newBuilder()
+        .setUserId(userId).build()), "getWeights").getWeightsMap();
   }
 
   /**

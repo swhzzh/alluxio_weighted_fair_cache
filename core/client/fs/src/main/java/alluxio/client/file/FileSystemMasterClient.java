@@ -271,4 +271,8 @@ public interface FileSystemMasterClient extends Client {
    */
   void updateUfsMode(AlluxioURI ufsUri, UpdateUfsModePOptions options)
       throws AlluxioStatusException;
+
+  void setUserWeights(long userId, Map<Long, Double> weights) throws AlluxioStatusException;
+
+  Map<Long, Double> getWeights(long userId) throws AlluxioStatusException;
 }
