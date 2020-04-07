@@ -126,7 +126,7 @@ public final class DefaultBlockWorker extends AbstractWorker implements BlockWor
   private SpaceReserver mSpaceReserver;
   private BlockSpaceUpdater mBlockSpaceUpdater;
   private UserSpaceReporter mUserSpaceReporter;
-  private UserWeightsSync mUserWeightsSync;
+  //private UserWeightsSync mUserWeightsSync;
   /**
    * Constructs a default block worker.
    *
@@ -152,7 +152,7 @@ public final class DefaultBlockWorker extends AbstractWorker implements BlockWor
       FileSystemMasterClient fileSystemMasterClient, Sessions sessions, BlockStore blockStore,
       UfsManager ufsManager) {
     super(Executors
-        .newFixedThreadPool(8, ThreadFactoryUtils.build("block-worker-heartbeat-%d", true)));
+        .newFixedThreadPool(7, ThreadFactoryUtils.build("block-worker-heartbeat-%d", true)));
     mBlockMasterClientPool = blockMasterClientPool;
     mBlockMasterClient = mBlockMasterClientPool.acquire();
     mFileSystemMasterClient = fileSystemMasterClient;
@@ -227,13 +227,13 @@ public final class DefaultBlockWorker extends AbstractWorker implements BlockWor
     mSpaceReserver = new SpaceReserver(this);
     mBlockSpaceUpdater = new BlockSpaceUpdater(this);
     mUserSpaceReporter = new UserSpaceReporter(this);
-    mUserWeightsSync = new UserWeightsSync(this, mFileSystemMasterClient);
-
-
-    getExecutorService().submit(
-        new HeartbeatThread(HeartbeatContext.WORKER_USER_WEIGHTS_SYNC, mUserWeightsSync,
-            (int) FormatUtils.parseTimeSize("1s"),
-            ServerConfiguration.global(), ServerUserState.global()));
+//    mUserWeightsSync = new UserWeightsSync(this, mFileSystemMasterClient);
+//
+//
+//    getExecutorService().submit(
+//        new HeartbeatThread(HeartbeatContext.WORKER_USER_WEIGHTS_SYNC, mUserWeightsSync,
+//            (int) FormatUtils.parseTimeSize("1s"),
+//            ServerConfiguration.global(), ServerUserState.global()));
     getExecutorService().submit(
         new HeartbeatThread(HeartbeatContext.WORKER_USER_SPACE_REPORTER, mUserSpaceReporter,
             (int) FormatUtils.parseTimeSize("5s"),

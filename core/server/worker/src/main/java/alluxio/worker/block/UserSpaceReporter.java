@@ -1,6 +1,8 @@
 package alluxio.worker.block;
 
 import alluxio.heartbeat.HeartbeatExecutor;
+import alluxio.util.IdUtils;
+import alluxio.wire.FileInfo;
 import alluxio.worker.block.meta.UserStorageInfo;
 
 import com.google.common.io.Closer;
@@ -40,7 +42,7 @@ public class UserSpaceReporter implements HeartbeatExecutor {
     }
 
     //preload
-    mBlockIdToFileNameMap.put(33554432L, "test1_10M.txt");
+/*    mBlockIdToFileNameMap.put(33554432L, "test1_10M.txt");
     mBlockIdToFileNameMap.put(67108864L, "test1_20M.txt");
     mBlockIdToFileNameMap.put(100663296L, "test1_30M.txt");
     mBlockIdToFileNameMap.put(134217728L, "test1_40M.txt");
@@ -59,7 +61,7 @@ public class UserSpaceReporter implements HeartbeatExecutor {
     mBlockIdToFileNameMap.put(369098752L, "test4_20M.txt");
     mBlockIdToFileNameMap.put(385875968L, "test4_30M.txt");
     mBlockIdToFileNameMap.put(402653184L, "test4_40M.txt");
-    mBlockIdToFileNameMap.put(419430400L, "test4_50M.txt");
+    mBlockIdToFileNameMap.put(419430400L, "test4_50M.txt");*/
   }
 
   public String generateUserSpaceReport(){
@@ -67,30 +69,42 @@ public class UserSpaceReporter implements HeartbeatExecutor {
     // log info some information
     long totalCapacityBytes = mBlockWorker.getTotalCapacityBytes();
     long totalAvailableBytes = mBlockWorker.getTotalAvailableBytes();
+    result.append(totalCapacityBytes * 1.0 / (1024 * 1024)).append("\t")
+        .append(totalAvailableBytes * 1.0 / (1024 * 1024)).append("\n");
     Map<Long, UserStorageInfo> userStorageInfoMap = mBlockWorker.getAllUserStorageInfo();
-      result.append("Total capacity is ").append(String.valueOf(totalCapacityBytes / (1024 * 1024))).append("mb\n")
-          .append("Total available is ").append(String.valueOf(totalAvailableBytes / (1024 * 1024))).append("mb\n");
+//      result.append("Total capacity is ").append(String.valueOf(totalCapacityBytes / (1024 * 1024))).append("mb\n")
+//          .append("Total available is ").append(String.valueOf(totalAvailableBytes / (1024 * 1024))).append("mb\n");
       for (Map.Entry<Long, UserStorageInfo> entry : userStorageInfoMap.entrySet()) {
         long userId = entry.getKey();
         UserStorageInfo userStorageInfo = entry.getValue();
         double weight = userStorageInfo.getWeight();
         long usedBytes = userStorageInfo.getUsedBytes();
-        result.append("User swh").append(String.valueOf(userId)).append("(weight").append(String.valueOf(weight))
-            .append(") uses ").append(String.valueOf(usedBytes / (1024.0 * 1024))).append("mb\nIts blocks are :\n");
+        result.append("swh").append(userId).append("\t").append(weight).append("\t")
+            .append(usedBytes * 1.0 / (1024 * 1024)).append("\n");
+//        result.append("User swh").append(String.valueOf(userId)).append("(weight").append(String.valueOf(weight))
+//            .append(") uses ").append(String.valueOf(usedBytes / (1024.0 * 1024))).append("mb\nIts blocks are :\n");
         int count = 0;
         for (Map.Entry<Long, Long> blockEntry : userStorageInfo.getBlockIdToUsedSpaceMap().entrySet()) {
           long blockId = blockEntry.getKey();
           long spaceUsed = blockEntry.getValue();
           String fileName = mBlockIdToFileNameMap.get(blockId);
           if (fileName == null){
-            fileName = String.valueOf(blockId);
+            try {
+              FileInfo fileInfo = mBlockWorker.getFileInfo(IdUtils.fileIdFromBlockId(blockId));
+              fileName = fileInfo.getName();
+              mBlockIdToFileNameMap.put(blockId, fileName);
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+            //fileName = String.valueOf(blockId);
           }
-          result.append(fileName).append("(").append(String.valueOf(spaceUsed / (1024.0 * 1024)))
-              .append("mb), ");
-          count++;
-          if (count % 4 == 0){
-            result.append("\n");
-          }
+//          result.append(fileName).append("(").append(String.valueOf(spaceUsed / (1024.0 * 1024)))
+//              .append("mb), ");
+          result.append(fileName).append("-").append(spaceUsed * 1.0 / (1024 * 1024)).append("\t");
+//          count++;
+//          if (count % 4 == 0){
+//            result.append("\n");
+//          }
         }
         result.append("\n");
       }

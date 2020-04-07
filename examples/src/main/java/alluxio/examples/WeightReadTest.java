@@ -20,15 +20,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class ReadTest {
+public class WeightReadTest {
 
   private static final String mUserDir = System.getProperty("user.dir");
 
 
   public static void main(String[] args) {
-    run();
-//    runAsWeight();
-//    runDefendWeight();
+    //run();
+    runAsWeight();
+    //runDefendWeight();
   }
 
   private static void runAsWeight(){
